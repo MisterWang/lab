@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../pack/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <title>my stars</title>
+</head>
+
+<body>
+    <div class="container">
+        <div id="stars">
+
+        </div>
+    </div>
+</body>
+<script src="../pack/jquery-3.2.1.min.js"></script>
+<script src="../pack/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script>
+    // var access_token = '';
+
+    // 'https://api.github.com/users/MisterWang/starred?sort=updated&per_page=100&page=2'
+    var url = "https://api.github.com/users/MisterWang/starred";
+    var list = [];
+    $(function() {
+        getStars();
+
+        function getStars(page = 1) {
+            //标签 分组 语言 描述
+            $.ajax({
+                url: url,
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    page: page,
+                    // access_token: access_token
+                },
+                success: function(res) {
+                    if (res.length > 0) {
+                        res.forEach(function(element) {
+                            $("#stars").append('<div class="col-md-3 box">' + element.name + '</div>');
+                            list.push(element);
+                        }, this);
+                        setTimeout(function() {
+                            getStars(page + 1)
+                        }, 443);
+                    }
+                }
+            });
+        }
+
+        var tag = {
+            tag: '',
+            desc: '',
+            list: []
+        };
+
+        var dbObj = indexedDB.open('stars', 1);
+        var store = dbObj.transaction.objectStore('stars', 'readwrite');
+        store
+    });
+</script>
+
+</html>
