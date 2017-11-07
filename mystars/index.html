@@ -18,6 +18,7 @@
 </body>
 <script src="../pack/jquery-3.2.1.min.js"></script>
 <script src="../pack/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script src="src/js/main.js"></script>
 <script>
     // var access_token = '';
 
@@ -25,7 +26,21 @@
     var url = "https://api.github.com/users/MisterWang/starred";
     var list = [];
     $(function() {
-        getStars();
+        new IDBCon(function(con) {
+            con.forEach('stars', function(key, value) {
+                list.push(value);
+            }, function() {
+                if (!list.length) {
+                    getStars();
+                } else {
+                    list.forEach(function(element) {
+                        $("#stars").append('<div class="col-md-3 box" data-id="' + element.id + '">' + element.name + '</div>');
+                    });
+                }
+                listen();
+            });
+            // getStars();
+        }).open();
 
         function getStars(page = 1) {
             //标签 分组 语言 描述
@@ -40,26 +55,28 @@
                 success: function(res) {
                     if (res.length > 0) {
                         res.forEach(function(element) {
-                            $("#stars").append('<div class="col-md-3 box">' + element.name + '</div>');
+                            $("#stars").append('<div class="col-md-3 box" data-id="' + element.id + '">' + element.name + '</div>');
                             list.push(element);
                         }, this);
                         setTimeout(function() {
                             getStars(page + 1)
                         }, 443);
+                    } else {
+                        new IDBCon(function(con) {
+                            list.forEach(function(elm) {
+                                con.set('stars', elm);
+                            });
+                        }).open();
                     }
                 }
             });
         }
 
-        var tag = {
-            tag: '',
-            desc: '',
-            list: []
-        };
-
-        var dbObj = indexedDB.open('stars', 1);
-        var store = dbObj.transaction.objectStore('stars', 'readwrite');
-        store
+        function listen() {
+            $('.box').click(function() {
+                console.log('click' + $(this).text());
+            });
+        }
     });
 </script>
 
